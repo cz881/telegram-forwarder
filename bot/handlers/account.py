@@ -278,7 +278,7 @@ class AccountHandlers:
         
         app_id = args[0].strip()
         app_hash = args[1].strip()
-        max_accounts = int(args[2]) if len(args) > 2 else 3
+        max_accounts = int(args[2]) if len(args) > 2 else 1
         
         try:
             success = await self.api_pool_manager.add_api(app_id, app_hash, max_accounts)
