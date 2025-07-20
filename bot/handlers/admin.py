@@ -119,7 +119,7 @@ class AdminHandlers:
         await update.message.reply_text(help_text, parse_mode='Markdown')
 
     @admin_required
-    async def backup_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def backup(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """手动备份"""
         try:
             await update.message.reply_text("🔄 开始备份数据...")
@@ -144,7 +144,7 @@ class AdminHandlers:
             await update.message.reply_text(f"❌ 备份失败: {str(e)}")
 
     @admin_required
-    async def restart_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def restart(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """重启系统"""
         try:
             await update.message.reply_text("⚠️ 确认要重启系统吗？这将中断所有正在进行的任务。\n\n回复 'YES' 确认重启。")
