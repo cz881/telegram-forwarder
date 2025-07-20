@@ -1,0 +1,42 @@
+# Telegram Forwarder 配置文件
+
+# 全局设置
+global_settings:
+  min_interval: 3          # 最小发送间隔(秒)
+  max_interval: 30         # 最大发送间隔(秒)
+  hourly_limit: 50         # 每小时发送限制
+  retry_attempts: 3        # 重试次数
+  media_timeout: 300       # 媒体下载超时(秒)
+
+# 账号轮换策略
+rotation:
+  strategy: "message"      # 轮换策略: message/time/smart
+  messages_per_rotation: 1 # 消息级轮换数量
+  time_per_rotation: 30    # 时间轮换间隔(分钟)
+  rest_time: 30           # 账号休息时间(分钟)
+
+# 过滤器设置
+filters:
+  remove_links: true       # 删除链接
+  remove_emojis: true      # 删除表情符号(保留#)
+  remove_special_chars: true # 删除特殊符号(保留#)
+  ad_detection: true       # 广告检测
+  smart_filter: true       # 智能过滤
+
+# 安全设置
+security:
+  session_encryption: true  # Session文件加密
+  backup_enabled: true      # 启用自动备份
+  log_retention_days: 30    # 日志保留天数
+
+# 监控设置
+monitoring:
+  health_check_interval: 300  # 健康检查间隔(秒)
+  alert_on_error: true        # 错误时告警
+  performance_monitoring: true # 性能监控
+
+# 数据库设置
+database:
+  cleanup_interval: 86400     # 清理间隔(秒)
+  backup_interval: 86400      # 备份间隔(秒)
+  max_backup_files: 7         # 最大备份文件数
