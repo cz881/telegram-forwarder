@@ -64,7 +64,7 @@
 ### 1. 一键安装
 ```bash
 # 从GitHub下载
-git clone https://github.com/yourusername/telegram-forwarder.git
+git clone https://github.com/cz881/telegram-forwarder.git
 cd telegram-forwarder
 chmod +x scripts/*.sh
 
