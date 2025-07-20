@@ -5,7 +5,7 @@
 import asyncio
 import logging
 import hashlib
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Any
 from telethon import events
 from telethon.tl.types import MessageMediaPhoto, MessageMediaDocument
 
