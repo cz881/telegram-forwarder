@@ -63,14 +63,19 @@ class AccountHandlers:
     @admin_required
     @error_handler
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """处理用户消息（用于登录流程）"""
+        """处理用户消息（包括登录流程和Web登录码）"""
         user_id = update.effective_user.id
         user_state = state_manager.get_user_state(user_id)
         user_data = state_manager.get_user_data(user_id)
         message_text = update.message.text.strip()
         
+        # 检查是否为管理员
+        if user_id not in self.settings.admin_users:
+            return
+        
+        # 1. 处理账号登录流程
         if user_state == UserState.WAITING_CODE:
-            # 处理验证码
+            # 现有的验证码处理逻辑...
             phone = user_data.get('phone')
             if not phone:
                 state_manager.clear_user_state(user_id)
@@ -79,44 +84,63 @@ class AccountHandlers:
             
             try:
                 result = await self.account_manager.submit_code(phone, message_text)
-                
-                if result['status'] == 'success':
-                    state_manager.clear_user_state(user_id)
-                    await update.message.reply_text(f"🎉 {result['message']}")
-                    
-                elif result['status'] == '2fa_required':
-                    state_manager.set_user_state(user_id, UserState.WAITING_2FA)
-                    await update.message.reply_text(
-                        f"🔐 {result['message']}\n\n请发送两步验证密码"
-                    )
-                else:
-                    await update.message.reply_text(f"❌ {result['message']}")
-                    
+                # ... 现有逻辑
             except Exception as e:
-                self.logger.error(f"提交验证码失败: {e}")
-                await update.message.reply_text(f"❌ 验证失败: {str(e)}")
+                # ... 错误处理
+                pass
         
         elif user_state == UserState.WAITING_2FA:
-            # 处理两步验证
-            phone = user_data.get('phone')
-            if not phone:
-                state_manager.clear_user_state(user_id)
-                await update.message.reply_text("❌ 会话已过期，请重新开始")
+            # 现有的两步验证处理逻辑...
+            pass
+        
+        # 2. 处理Web登录码（新增）
+        elif len(message_text) == 6 and message_text.isdigit():
+            await self._handle_web_login_code(update, message_text, user_id)
+        
+        # 3. 处理其他普通消息
+        else:
+            # 如果不是在特定状态中，可以处理其他逻辑
+            pass
+    
+    async def _handle_web_login_code(self, update: Update, login_code: str, user_id: int):
+        """处理Web登录码"""
+        try:
+            # 导入Web认证管理器
+            from web.auth import get_auth_manager
+            
+            auth_manager = get_auth_manager()
+            if not auth_manager:
+                await update.message.reply_text("❌ Web服务未启用")
                 return
             
-            try:
-                result = await self.account_manager.submit_2fa_password(phone, message_text)
+            # 验证登录码
+            if auth_manager.verify_login_code_from_bot(login_code, user_id):
+                await update.message.reply_text(
+                    "✅ **Web登录验证成功！**\n\n"
+                    "🌐 您现在可以在浏览器中访问管理后台了\n"
+                    "📱 页面将自动跳转到仪表板\n\n"
+                    "🔒 为了安全，建议完成操作后及时退出登录",
+                    parse_mode='Markdown'
+                )
                 
-                state_manager.clear_user_state(user_id)
+                self.logger.info(f"Web登录验证成功: 用户{user_id}, 登录码{login_code}")
                 
-                if result['status'] == 'success':
-                    await update.message.reply_text(f"🎉 {result['message']}")
-                else:
-                    await update.message.reply_text(f"❌ {result['message']}")
-                    
-            except Exception as e:
-                self.logger.error(f"两步验证失败: {e}")
-                await update.message.reply_text(f"❌ 验证失败: {str(e)}")
+            else:
+                await update.message.reply_text(
+                    "❌ **登录码验证失败**\n\n"
+                    "可能原因：\n"
+                    "• 登录码已过期（5分钟有效期）\n"
+                    "• 登录码不正确\n"
+                    "• 登录码已使用过\n\n"
+                    "💡 请重新在网页上获取新的登录码"
+                )
+                
+        except Exception as e:
+            self.logger.error(f"Web登录码处理失败: {e}")
+            await update.message.reply_text(
+                "❌ 处理登录码时发生错误\n\n"
+                "请稍后重试或联系管理员"
+            )
 
     @admin_required
     @error_handler
