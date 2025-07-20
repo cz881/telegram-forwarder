@@ -36,7 +36,7 @@ class APIPoolManager:
         self.is_running = False
         self.logger.info("✅ API池管理器已停止")
 
-    async def add_api(self, app_id: str, app_hash: str, max_accounts: int = 3) -> bool:
+    async def add_api(self, app_id: str, app_hash: str, max_accounts: int = 1) -> bool:
         """添加API ID到池中"""
         async with self._lock:
             try:
